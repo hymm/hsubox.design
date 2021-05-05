@@ -4,7 +4,7 @@ import Footer from "@includes/footer";
 
 export default function DefaultLayout({ children, title, description }) {
   return (
-    <main>
+    <main className="grid">
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />

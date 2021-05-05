@@ -1,7 +1,10 @@
 export default function Footer() {
   return (
     <footer>
-      <p>©2021 | Footer</p>
+      <p>Mike Hsu's blog</p>
+      <ul>
+        <li>Github</li>
+      </ul>
     </footer>
   );
 }
