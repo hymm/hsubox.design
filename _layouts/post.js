@@ -25,8 +25,10 @@ export default function PostLayout({ title, content }) {
                 <SyntaxHighlighter
                   style={darcula}
                   language={match[1]}
-                  PreTag="div"
                   children={String(children).replace(/\n$/, "")}
+                  PreTag={({children, ...props}) => {
+                    return <pre className="pre-code" {...props}>{children}</pre>;
+                  }}
                   {...props}
                 />
               ) : (

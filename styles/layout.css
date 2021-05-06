@@ -8,14 +8,9 @@ header, footer, article {
   grid-column: 1 / 4;
 }
 
-/*
-@media all and (max-width: 700px) {
-  aside,
-  article {
-    grid-column: 1 / 4;
-  }
+.pre-code {
+  max-width: 90vw;
 }
-+/
 
 /* Demo Specific Styles */
 body {
