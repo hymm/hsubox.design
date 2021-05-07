@@ -8,6 +8,10 @@ export default function DefaultLayout({ children, title, description }) {
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
+        <style>
+          @import
+          url('https://fonts.googleapis.com/css2?family=Arimo&family=Overpass:wght@900&display=swap');
+        </style>
       </Head>
       <Header />
       {children}

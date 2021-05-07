@@ -6,8 +6,7 @@ date: 2021-05-04
 
 My frogger clone, "Shoe Crosses the Road" was having some issues with a big framerate hitch during the first collision between the player and a car.  During subsequent collisions the problem did not happen.  I suspected this was due to archetype fragmentation as I had naively implemented, where I knew that I was adding components that would fragment the archetypes.
 
-![Gif of Frame Drops](/images/bad-crash.gif)
-![Gif without Frame Drops](/images/good-crash.gif)
+![Gif of Frame Drops](/images/bad-crash-zoomed.gif) ![Gif without Frame Drops](/images/good-crash-zoomed.gif)
 
 Frame stepping the vidoe capture I can see that it's dropping about 8 frames.
 
@@ -38,10 +37,10 @@ fn print_ecs_counts(
 ```
 
 ```bash
-// before collision
+# before collision
 entities: 263, components: 157, archetypes: 9
 
-// after collision
+# after collision
 entities: 263, components: 158, archetypes: 18
 ```
 
@@ -62,7 +61,7 @@ Maybe something to do with Player.  Lets see what we can figure out
 archetype ids:
 8,
 
-// after collision
+# after collision
 >>> archetypes find --componentid 131
 
 archetype ids:
