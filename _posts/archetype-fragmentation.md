@@ -16,7 +16,9 @@ In bevy engine, each unique group of components is termed an archetype.  This is
 
 When you add or remove a component from an entity this changes the archetype of an entity.  This forces the ecs to create a new type and allocate memory for the new type.  and also remove the entity from the old archetype (which may require repacking the old archetype) and copying it's data to the new archetype.
 
-## Looking into the ECS, does it stare back?
+## Looking into the ECS, does it stare back? or why i wrote bevy_mod_debug_dump
+
+Bevy exposes several system params that contain information about the ecs. `Archetypes`, `Components`, and `Entities` give access to meta information about the ecs. For example you can write a system as follows to print the counts of the archetypes, components, and entities.
 
 ```rust
 // information about the ecs is available through the 
@@ -35,6 +37,9 @@ fn print_ecs_counts(
     ))
 }
 ```
+
+I wrote `bevy_mod_debug_console` library to have more ready access to this info for debugging.
+
 
 ```bash
 # before collision
