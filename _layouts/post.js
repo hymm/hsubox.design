@@ -21,7 +21,6 @@ export default function PostLayout({ title, content }) {
           components={{
             code({ node, inline, className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "");
-              console.log(props);
               return !inline && match ? (
                 <SyntaxHighlighter
                   useInlineStyles={false}
