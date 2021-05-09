@@ -1,0 +1,12 @@
+.footer ul {
+  list-style-type: none;
+}
+
+.github-link {
+  display: flex;
+  align-items: center;
+}
+
+.github-link span {
+  margin-left: 0.5rem;
+}
