@@ -1,9 +1,7 @@
 import DefaultLayout from "@layouts/default";
 import Head from "next/head";
-import Link from "next/link";
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { darcula } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import gfm from "remark-gfm";
 import Image from "next/image";
 // import CodeBlock from "./CodeBlock";
@@ -40,11 +38,6 @@ export default function PostLayout({ title, content }) {
         >
           {content}
         </Markdown>
-        <div>
-          <Link href="/">
-            <a>Home</a>
-          </Link>
-        </div>
       </article>
     </DefaultLayout>
   );
