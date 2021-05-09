@@ -28,7 +28,7 @@ export default function PostLayout({ title, content }) {
                   style={{ textShadow: "none", color: undefined }}
                 />
               ) : (
-                <code className={className} {...props} />
+                <code className={className} {...props} children={children} />
               );
             },
             image({ ...props }) {

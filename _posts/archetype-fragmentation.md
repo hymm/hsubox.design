@@ -4,19 +4,30 @@ date: 2021-05-04
 ---
 ![Screenshot of "Shoe Crosses the Road"](/images/shoe-crosses-the-road.png)
 
-My frogger clone, "Shoe Crosses the Road" was having some issues with a big framerate hitch during the first collision between the player and a car.  During subsequent collisions the problem did not happen.  I suspected this was due to archetype fragmentation as I had naively implemented, where I knew that I was adding components that would fragment the archetypes.
+My frogger clone, "Shoe Crosses the Road" was having some issues with a big framerate hitch during the first collision between the player and a car.  During subsequent collisions the problem did not happen.
 
-![Gif of Frame Drops](/images/bad-crash-zoomed.gif) ![Gif without Frame Drops](/images/good-crash-zoomed.gif)
+### First Collision
+![Gif of Frame Drops](/images/bad-crash-zoomed.gif) 
 
-Frame stepping the vidoe capture I can see that it's dropping about 8 frames.
+### Subsequent Collisions
+![Gif without Frame Drops](/images/good-crash-zoomed.gif)
 
-## What is an Archetype?
+Frame stepping the video capture I can see that it's dropping about 8 frames. I expect that this was due to archetype fragmentation. I had coded the Player without worrying about fragmentation too much and the fact that it was happening on a collision event where I knew components were being added and removed.  I could just refactor away this fragmentation, but lets use some of bevy's introspection abilities to take a look under the hood.
+## What is Archetype Fragmentation and why is it so bad?
 
-In bevy engine, each unique group of components is termed an archetype.  This is effectively the "type" of an entity.  So an entity with components (A, B, C) would be considered a different archetype from an entity with 
+In bevy engine, each unique group of components is termed an archetype.  This is effectively the "type" of an entity.  So an entity with components (A, B, C) would be considered a different archetype from an entity with (A, B, C, D).
 
-When you add or remove a component from an entity this changes the archetype of an entity.  This forces the ecs to create a new type and allocate memory for the new type.  and also remove the entity from the old archetype (which may require repacking the old archetype) and copying it's data to the new archetype.
+When you add or remove a component from an entity this changes the archetype of an entity.  This forces the ecs to create a new type and allocate memory for the new type.  and also remove the entity from the old archetype  and copying it's data to the new archetype.  This might also require repacking the table storage of the old archetypes as table storage is a dense storage.
 
+It's beyond the scope of this article to describe the structure on an ecs in detail.  Consider these for further reading:
+### Further Reading
+* probably not include this one https://community.amethyst.rs/t/archetypal-vs-grouped-ecs-architectures-my-take/1344/2
+* bevy 5.0 new post
+* golden PR
+* https://skypjack.github.io/2019-03-07-ecs-baf-part-2/
 ## Looking into the ECS, does it stare back?
+
+Bevy exposes several system params that contain information about the ecs. `Archetypes`, `Components`, and `Entities` give access to meta information about the ecs. For example you can write a system as follows to print the counts of the archetypes, components, and entities.
 
 ```rust
 // information about the ecs is available through the 
@@ -36,6 +47,9 @@ fn print_ecs_counts(
 }
 ```
 
+I wrote `bevy_mod_debug_console` library to have more ready access to this info for debugging.
+
+
 ```bash
 # before collision
 entities: 263, components: 157, archetypes: 9
@@ -44,9 +58,13 @@ entities: 263, components: 157, archetypes: 9
 entities: 263, components: 158, archetypes: 18
 ```
 
-The collision adds one component.  This is the particle marker component.  But unexpectedly there are 9 archetypes added.  This is double what it started with.  What the hell happened?
+The collision adds one component.  I know this is the particle marker component.  But unexpectedly there are 9 archetypes added.  This is double what it started with.  What the hell happened?
 
-Maybe something to do with Player.  Lets see what we can figure out 
+There are three entities involved in a collision, the car, the player, and the blood particles.  The car is not acted upon in a collision.  So either or both the player and blood are causing the hitch.  Let's investigate the player first.
+
+## Investigating the Player Entity
+
+The player entity is spawned with a marker component.  We can use `bevy_mod_debug_console` to query for the `Player` component like so:
 
 ```bash
 >>> components list --filter Player
@@ -110,7 +128,20 @@ lets collect this info into a table to compare more easily
 |MainPass|MainPass|MainPass|
 |Handle<Mesh>|Handle<Mesh>|Handle<Mesh>|
 
-We see that a NextPosition Component is added in archetype 10 and a Velocity component is added in archetype 11.
+We see that a `NextPosition` Component is added in archetype 10 and a `Velocity` component is added in archetype 11.  So lets refactor to add these to the player bundle.
+
+
+### Refactoring
+
+I didn't add these into the initial player bundle that is used to spawn the `Player`. I wanted to not run systems that used `NextPosition` and `Velocity` when not needed.  So to refactor this I'll need to make sure those systems don't act on the Player when these aren't needed.
+
+I was removing velocity when it's near zero, so the player doesn't move, but will change to always have a velocty.  I'll probably use an early return in the systems when `Velocity` is near zero. 
+
+For `NextPosition` specifies which tile to move to next and systems that use `NextPosition` need to not run when `CurrentPosition` is equal to `NextPosition`.  For this I'll refactor to use an `Option<Position>`.
+
+### Results
+
+
 
 ## Talking Points
 * purposely did a naive implementation
@@ -121,8 +152,3 @@ We see that a NextPosition Component is added in archetype 10 and a Velocity com
 ### Notes
 * bevy has a hybrid storage model.  meaning it implements 2 types of storages, tables and sparse sets.  In the ecs world tables are normally called archetypes. but bevy uses archetype to refer to the specific set of components of an entity.
 
-### Further Reading
-* probably not include this one https://community.amethyst.rs/t/archetypal-vs-grouped-ecs-architectures-my-take/1344/2
-* bevy 5.0 new post
-* golden PR
-* https://skypjack.github.io/2019-03-07-ecs-baf-part-2/
